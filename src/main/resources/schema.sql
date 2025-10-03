@@ -4,6 +4,12 @@ CREATE TABLE users (
     email VARCHAR(150) NOT NULL UNIQUE
 );
 
+-- Insert sample users
+INSERT INTO users (name, email) VALUES
+('Alice Müller', 'alice.muller@example.com'),
+('Bob Schmidt', 'bob.schmidt@example.com'),
+('Carlos García', 'carlos.garcia@example.com');
+
 CREATE TABLE meeting (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(200) NOT NULL,

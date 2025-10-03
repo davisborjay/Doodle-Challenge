@@ -1,31 +1,22 @@
 package com.doodle.backend.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.JoinColumn;
+import lombok.Builder;
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-@Entity
 @Table(name = "meeting")
-@Getter
-@Setter
+@Data
+@Builder
 public class Meeting {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
@@ -36,18 +27,10 @@ public class Meeting {
     private String description;
 
     @NotNull
-    @Column(name = "start_time", nullable = false)
+    @Column("start_time")
     private LocalDateTime startTime;
 
     @NotNull
-    @Column(name = "end_time", nullable = false)
+    @Column("end_time")
     private LocalDateTime endTime;
-
-    @ManyToMany
-    @JoinTable(
-            name = "meeting_participant",
-            joinColumns = @JoinColumn(name = "meeting_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private List<User> participants;
 }
