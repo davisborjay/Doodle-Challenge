@@ -32,4 +32,7 @@ public class TimeSlot {
 
     @Column("meeting_id")
     private Long meetingId;
+
+    @Column("idempotency_key")
+    private String idempotencyKey;
 }

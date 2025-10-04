@@ -25,10 +25,13 @@ CREATE TABLE time_slot (
     end_time TIMESTAMP NOT NULL,
     is_busy BOOLEAN DEFAULT FALSE,
     meeting_id BIGINT,
+    idempotency_key VARCHAR(100),
     CONSTRAINT fk_slot_user FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT fk_slot_meeting FOREIGN KEY (meeting_id) REFERENCES meeting(id),
     CONSTRAINT chk_valid_time CHECK (end_time > start_time)
 );
+
+CREATE UNIQUE INDEX uq_idempotency_key ON time_slot (idempotency_key);
 
 -- To avoid overlapping, this index avoids slots with exactly the same range.
 CREATE UNIQUE INDEX uq_user_slot_range
