@@ -33,4 +33,7 @@ public class Meeting {
     @NotNull
     @Column("end_time")
     private LocalDateTime endTime;
+
+    @Column("idempotency_key")
+    private String idempotencyKey;
 }

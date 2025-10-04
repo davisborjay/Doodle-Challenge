@@ -1,0 +1,10 @@
+version: '3.9'
+services:
+  doodle-backend:
+    build: .
+    container_name: doodle-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+    restart: always

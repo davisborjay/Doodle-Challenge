@@ -29,4 +29,10 @@ public interface SlotRepository extends ReactiveCrudRepository<TimeSlot, Long> {
         ORDER BY start_time
     """)
     Flux<TimeSlot> findByUserId(Long userId);
+
+    @Query("""
+        SELECT * FROM time_slot
+        WHERE meeting_id = :meetingId
+    """)
+    Mono<TimeSlot> findByMeetingId(Long meetingId);
 }

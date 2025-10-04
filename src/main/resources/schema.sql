@@ -15,7 +15,8 @@ CREATE TABLE meeting (
     title VARCHAR(200) NOT NULL,
     description VARCHAR(500),
     start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP NOT NULL
+    end_time TIMESTAMP NOT NULL,
+    idempotency_key VARCHAR(100)
 );
 
 CREATE TABLE time_slot (
