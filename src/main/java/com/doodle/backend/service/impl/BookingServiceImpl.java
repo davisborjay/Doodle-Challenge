@@ -4,6 +4,7 @@ import com.doodle.backend.dto.BookingRequestDto;
 import com.doodle.backend.dto.BookingResponseDto;
 import com.doodle.backend.entity.Meeting;
 import com.doodle.backend.entity.MeetingParticipant;
+import com.doodle.backend.mapper.BookingMapper;
 import com.doodle.backend.repository.BookingRepository;
 import com.doodle.backend.repository.MeetingParticipantRepository;
 import com.doodle.backend.repository.SlotRepository;
@@ -31,7 +32,7 @@ public class BookingServiceImpl implements BookingService {
         return bookingRepository.findByIdempotencyKey(idempotencyKey)
                 .flatMap(existing -> {
                     log.info("Idempotent request detected for key={}", idempotencyKey);
-                    return Mono.just(buildBookingResponseDto(request, existing));
+                    return Mono.just(BookingMapper.buildBookingResponseDto(request, existing));
                 })
                 .switchIfEmpty(
                         // validate slots before creating the meeting
@@ -50,7 +51,7 @@ public class BookingServiceImpl implements BookingService {
                                 .collectList()
                                 // Create the meeting if all slots are valid
                                 .flatMap(validSlots ->
-                                        bookingRepository.save(buildMeting(request, idempotencyKey))
+                                        bookingRepository.save(BookingMapper.buildMeting(request, idempotencyKey))
                                                 .flatMap(savedMeeting ->
                                                         Flux.fromIterable(validSlots)
                                                                 .flatMap(slot -> {
@@ -61,41 +62,13 @@ public class BookingServiceImpl implements BookingService {
                                                                 .thenMany(
                                                                         Flux.fromIterable(request.getParticipantIds())
                                                                                 .flatMap(userId -> participantRepository.save(
-                                                                                        buildMeetingParticipant(savedMeeting, userId)))
+                                                                                        BookingMapper.buildMeetingParticipant(savedMeeting, userId)))
                                                                 )
                                                                 .collectList()
-                                                                .then(Mono.just(buildBookingResponseDto(request, savedMeeting)))
+                                                                .then(Mono.just(BookingMapper.buildBookingResponseDto(request, savedMeeting)))
                                                 )
                                 )
                 );
-    }
-
-    private static BookingResponseDto buildBookingResponseDto(BookingRequestDto request, Meeting savedMeeting) {
-        return BookingResponseDto.builder()
-                .id(savedMeeting.getId())
-                .title(savedMeeting.getTitle())
-                .description(savedMeeting.getDescription())
-                .startTime(savedMeeting.getStartTime())
-                .endTime(savedMeeting.getEndTime())
-                .participantIds(request.getParticipantIds())
-                .build();
-    }
-
-    private static MeetingParticipant buildMeetingParticipant(Meeting savedMeeting, Long userId) {
-        return MeetingParticipant.builder()
-                .meetingId(savedMeeting.getId())
-                .userId(userId)
-                .build();
-    }
-
-    private static Meeting buildMeting(BookingRequestDto request, String idempotencyKey) {
-        return Meeting.builder()
-                .title(request.getTitle())
-                .description(request.getDescription())
-                .startTime(request.getStartTime())
-                .endTime(request.getEndTime())
-                .idempotencyKey(idempotencyKey)
-                .build();
     }
 
     @Override

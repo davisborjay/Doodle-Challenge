@@ -3,6 +3,7 @@ package com.doodle.backend.service.impl;
 import com.doodle.backend.dto.SlotRequestDto;
 import com.doodle.backend.dto.SlotResponseDto;
 import com.doodle.backend.entity.TimeSlot;
+import com.doodle.backend.mapper.SlotMapper;
 import com.doodle.backend.repository.SlotRepository;
 import com.doodle.backend.service.SlotService;
 import lombok.extern.slf4j.Slf4j;
@@ -22,34 +23,24 @@ public class SlotServiceImpl implements SlotService {
         log.info("calling slotRepository.findOverlappingSlot for userId={}", request.getUserId());
 
         return slotRepository.findByIdempotencyKey(idempotencyKey)
-                .map(SlotServiceImpl::buildSlotResponseDto)
+                .map(SlotMapper::buildSlotResponseDto)
                 .switchIfEmpty(
                         slotRepository.findOverlappingSlot(request.getStartTime(), request.getEndTime())
                                 .flatMap(existing ->
                                         Mono.<SlotResponseDto>error(new IllegalArgumentException("Overlapping slot exists"))
                                 )
                                 .switchIfEmpty(Mono.defer(() ->
-                                        slotRepository.save(buildTimeSlot(request, idempotencyKey))
-                                                .map(SlotServiceImpl::buildSlotResponseDto)
+                                        slotRepository.save(SlotMapper.buildTimeSlot(request, idempotencyKey))
+                                                .map(SlotMapper::buildSlotResponseDto)
                                 ))
                 );
-    }
-
-    private static TimeSlot buildTimeSlot(SlotRequestDto request, String idempotencyKey) {
-        return TimeSlot.builder()
-                .userId(request.getUserId())
-                .startTime(request.getStartTime())
-                .endTime(request.getEndTime())
-                .busy(false)
-                .idempotencyKey(idempotencyKey)
-                .build();
     }
 
     @Override
     public Flux<SlotResponseDto> getSlotsByUser(Long userId) {
         log.info("calling slotRepository.findByUserId for userId={}", userId);
         return slotRepository.findByUserId(userId)
-                .map(SlotServiceImpl::buildSlotResponseDto);
+                .map(SlotMapper::buildSlotResponseDto);
     }
 
     @Override
@@ -67,15 +58,6 @@ public class SlotServiceImpl implements SlotService {
                     existing.setUserId(request.getUserId());
                     return slotRepository.save(existing);
                 })
-                .map(SlotServiceImpl::buildSlotResponseDto);
-    }
-
-    private static SlotResponseDto buildSlotResponseDto(TimeSlot s) {
-        return SlotResponseDto.builder()
-                .id(s.getId())
-                .endTime(s.getEndTime())
-                .startTime(s.getStartTime())
-                .reserved(s.isBusy())
-                .build();
+                .map(SlotMapper::buildSlotResponseDto);
     }
 }
