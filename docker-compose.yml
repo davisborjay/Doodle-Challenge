@@ -10,6 +10,9 @@ services:
     restart: always
     networks:
       - monitoring
+    depends_on:
+      - prometheus
+      - grafana
 
   prometheus:
     image: prom/prometheus:latest
@@ -28,6 +31,8 @@ services:
       - "3000:3000"
     networks:
       - monitoring
+    depends_on:
+      - prometheus
 
 networks:
   monitoring:
