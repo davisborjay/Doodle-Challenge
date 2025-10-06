@@ -150,16 +150,42 @@ You can also scrape metrics with Prometheus.
 ---
 
 ## How to Consume the Service
-
 * Use **HTTP POST/GET/PUT/DELETE** requests.
-* Include `Idempotency-Key` header for creating slots or bookings to ensure safe retries.
-* Example cURL request:
+* Include the `Idempotency-Key` header when creating slots or bookings to ensure safe retries.
 
+### Sample Users
+The database is preloaded (via `schema.sql`) with the following users:
+
+| id | name           | email                     |
+|----|----------------|---------------------------|
+| 1  | Alice Müller   | alice.muller@example.com   |
+| 2  | Bob Schmidt    | bob.schmidt@example.com    |
+| 3  | Carlos García  | carlos.garcia@example.com  |
+
+Use these `userId` values in your API requests.
+
+---
+
+### Example cURL Requests
+
+> 💡 **Note:** The syntax for `curl` may vary depending on your operating system.
+>
+> - On **Linux/macOS**, line breaks use `\`
+> - On **Windows (CMD)**, use everything in a single line
+> - On **Windows (PowerShell)**, use backticks (`` ` ``) for line breaks
+
+#### Create a new slot (example for user 1)
+
+**Linux/macOS:**
 ```bash
 curl -X POST http://localhost:8080/api/v1/slots \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: key123" \
-  -d '{"userId":1,"startTime":"2025-10-05T21:30:00","endTime":"2025-10-05T22:45:00"}'
+  -d '{"userId":1,"startTime":"2025-12-05T11:30:00","endTime":"2025-12-05T12:45:00"}'
+```
+**Windows (CMD):**
+```bash
+curl -X POST http://localhost:8080/api/v1/slots -H "Content-Type: application/json" -H "Idempotency-Key: key123" -d "{\"userId\":1,\"startTime\":\"2025-12-05T11:30:00\",\"endTime\":\"2025-12-05T12:45:00\"}"
 ```
 
 * GET all slots for user 1:
@@ -167,5 +193,4 @@ curl -X POST http://localhost:8080/api/v1/slots \
 ```bash
 curl http://localhost:8080/api/v1/slots/1
 ```
-
 ---
